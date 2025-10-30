@@ -1,8 +1,12 @@
-# semantic-docs
+# semantic-docs-next
+
+**Next.js version** of the original [semantic-docs](https://github.com/llbbl/semantic-docs) Astro theme.
 
 Documentation theme with semantic vector search.
 
-A beautiful, dark-mode documentation theme powered by [libsql-search](https://github.com/llbbl/libsql-search) for semantic search capabilities. Perfect for technical documentation, knowledge bases, and content-heavy sites.
+A beautiful, dark-mode documentation theme powered by [libsql-search](https://github.com/llbbl/libsql-search) for semantic search capabilities. Built with **Next.js 15** and **React 19** for server-side rendering and optimal performance.
+
+> **Note:** Looking for the Astro version? Check out the [original semantic-docs template](https://github.com/llbbl/semantic-docs).
 
 ## Features
 
@@ -19,8 +23,8 @@ A beautiful, dark-mode documentation theme powered by [libsql-search](https://gi
 ### 1. Clone or Use as Template
 
 ```bash
-git clone https://github.com/llbbl/semantic-docs.git
-cd semantic-docs
+git clone git@github.com:llbbl/semantic-docs-next.git
+cd semantic-docs-next
 ```
 
 Or use as a template on GitHub.
@@ -152,7 +156,7 @@ OPENAI_API_KEY=your-key
 ## Project Structure
 
 ```
-semantic-docs/
+semantic-docs-next/
 ├── app/
 │   ├── api/
 │   │   └── search/
@@ -208,13 +212,20 @@ netlify deploy --prod
 # Add environment variables in Netlify dashboard
 ```
 
-### Cloudflare Pages
+### Docker
 
 ```bash
-# Build
-pnpm build
+# Build Docker image
+docker build -t semantic-docs-next .
 
-# Deploy dist/ folder via Cloudflare dashboard
+# Run container
+docker run -p 3000:3000 semantic-docs-next
+```
+
+Or using Docker Compose:
+
+```bash
+docker compose up
 ```
 
 **Important:** Run `pnpm index` before building to ensure content is indexed.
@@ -301,8 +312,8 @@ MIT
 
 ## Support
 
-- [Issues](https://github.com/llbbl/semantic-docs/issues)
-- [Discussions](https://github.com/llbbl/semantic-docs/discussions)
+- [Issues](https://github.com/llbbl/semantic-docs-next/issues)
+- [Discussions](https://github.com/llbbl/semantic-docs-next/discussions)
 
 ## Credits
 
