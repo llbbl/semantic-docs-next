@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Docs Table of Contents Component
  * Automatically generated from page headings

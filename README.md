@@ -108,22 +108,25 @@ This will:
 pnpm dev
 ```
 
-Visit `http://localhost:4321` to see your docs!
+Visit `http://localhost:3000` to see your docs!
 
 ## Customization
 
 ### Change Site Title
 
-Edit `src/components/DocsHeader.astro`:
+Edit `components/DocsHeader.tsx`:
 
-```astro
-<span class="font-sans">Your Site Name</span>
+```tsx
+<span className="font-sans hidden sm:inline">Your Site Name</span>
 ```
 
-And `src/layouts/DocsLayout.astro`:
+And `app/layout.tsx`:
 
-```astro
-const { title = "Your Site Name", description = "Your description" } = Astro.props;
+```tsx
+export const metadata: Metadata = {
+  title: 'Your Site Name',
+  description: 'Your description',
+};
 ```
 
 ### Customize Colors
@@ -150,28 +153,31 @@ OPENAI_API_KEY=your-key
 
 ```
 semantic-docs/
+├── app/
+│   ├── api/
+│   │   └── search/
+│   │       └── route.ts        # Search API endpoint
+│   ├── content/
+│   │   └── [...slug]/
+│   │       └── page.tsx        # Article pages
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx                # Home page
+├── components/
+│   ├── DocsHeader.tsx          # Header with search
+│   └── DocsSidebar.tsx         # Navigation sidebar
 ├── src/
 │   ├── components/
-│   │   ├── DocsHeader.astro    # Header with search
-│   │   ├── DocsSidebar.astro   # Navigation sidebar
 │   │   ├── DocsToc.tsx         # Table of contents
-│   │   └── Search.tsx          # Search component
-│   ├── layouts/
-│   │   └── DocsLayout.astro    # Main layout
+│   │   ├── Search.tsx          # Search component
+│   │   └── ThemeSwitcher.tsx   # Theme toggle
 │   ├── lib/
 │   │   └── turso.ts            # Database client
-│   ├── pages/
-│   │   ├── api/
-│   │   │   └── search.json.ts  # Search API endpoint
-│   │   ├── content/
-│   │   │   └── [...slug].astro # Article pages
-│   │   └── index.astro         # Home page
 │   └── styles/
 │       └── global.css          # Global styles
 ├── scripts/
-│   └── index-content.js        # Indexing script
+│   └── index-content.ts        # Indexing script
 ├── content/                    # Your markdown files
-├── astro.config.mjs
+├── next.config.mjs
 ├── package.json
 └── .env                        # Your credentials
 ```
@@ -260,7 +266,7 @@ pnpm preview
 ### Search not working
 
 1. Check `.env` file has correct credentials
-2. Ensure `output: 'server'` in `astro.config.mjs`
+2. Ensure API route is working at `/api/search`
 3. Verify content is indexed: run `pnpm index`
 
 ### Content not showing
@@ -282,11 +288,11 @@ GEMINI_API_KEY=your-key
 
 ## Tech Stack
 
-- **Framework**: [Astro](https://astro.build) 5
+- **Framework**: [Next.js](https://nextjs.org) 15
 - **Search**: [libsql-search](https://github.com/llbbl/libsql-search)
 - **Database**: [Turso](https://turso.tech) (libSQL)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com) 4
-- **UI**: React islands for interactivity
+- **UI**: React 19 with Server Components
 - **Embeddings**: Xenova, Gemini, or OpenAI
 
 ## License

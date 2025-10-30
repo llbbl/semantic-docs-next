@@ -3,6 +3,8 @@
  * For production with multiple servers, use Redis or edge rate limiting
  */
 
+import type { NextRequest } from 'next/server';
+
 interface RateLimitEntry {
   count: number;
   resetTime: number;
@@ -40,7 +42,7 @@ export interface RateLimitResult {
 /**
  * Get client identifier from request
  */
-function getClientId(request: Request): string {
+function getClientId(request: NextRequest): string {
   // Try to get IP from various headers (depending on deployment platform)
   const forwarded = request.headers.get('x-forwarded-for');
   const realIp = request.headers.get('x-real-ip');
@@ -56,7 +58,7 @@ function getClientId(request: Request): string {
  * Check if request is rate limited
  */
 export function checkRateLimit(
-  request: Request,
+  request: NextRequest,
   config: RateLimitConfig = { maxRequests: 10, windowSeconds: 60 },
 ): RateLimitResult {
   const clientId = getClientId(request);

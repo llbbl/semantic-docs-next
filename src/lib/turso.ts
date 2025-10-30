@@ -10,17 +10,21 @@ let client: Client | null = null;
 
 export function getTursoClient(): Client {
   if (!client) {
-    const url = import.meta.env.TURSO_DB_URL || process.env.TURSO_DB_URL;
-    const authToken =
-      import.meta.env.TURSO_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
+    const url = process.env.TURSO_DB_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
 
     if (url && authToken) {
       // Use Turso remote database
-      logger.info(`Using Turso database: ${url}`);
+      // Only log in production to avoid noise from Next.js dev mode hot reloading
+      if (process.env.NODE_ENV === 'production') {
+        logger.info(`Using Turso database: ${url}`);
+      }
       client = createClient({ url, authToken });
     } else {
       // Fall back to local libSQL file (for CI/development)
-      logger.warn('Turso credentials not found, using local libSQL database');
+      if (process.env.NODE_ENV === 'production') {
+        logger.info('Using local libSQL database: file:local.db');
+      }
       client = createClient({ url: 'file:local.db' });
     }
   }

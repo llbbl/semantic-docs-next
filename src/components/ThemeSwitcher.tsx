@@ -22,6 +22,14 @@ export default function ThemeSwitcher() {
     if (!theme) return;
 
     const root = document.documentElement;
+
+    // Manage dark class
+    if (themeName === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
     Object.entries(theme.colors).forEach(([key, value]) => {
       const cssVar = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
       root.style.setProperty(cssVar, value);

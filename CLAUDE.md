@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**semantic-docs** is an Astro-based documentation theme with semantic vector search powered by libsql-search. It combines static site generation with server-rendered search using Turso (libSQL) for edge-optimized semantic search capabilities.
+**semantic-docs** is a Next.js-based documentation theme with semantic vector search powered by libsql-search. It combines static site generation with server-rendered search using Turso (libSQL) for edge-optimized semantic search capabilities.
 
 ## Essential Commands
 
@@ -13,14 +13,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 pnpm install
 
-# Start dev server (runs on http://localhost:4321)
+# Start dev server (runs on http://localhost:3000)
 pnpm dev
 
 # Build for production
 pnpm build
 
-# Preview production build
-pnpm preview
+# Start production server
+pnpm start
 ```
 
 ### Content Management

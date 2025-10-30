@@ -5,16 +5,14 @@
 
 import { search } from '@logan/libsql-search';
 import { logger } from '@logan/logger';
-import type { APIRoute } from 'astro';
-import { getTursoClient } from '../../lib/turso';
+import { NextRequest, NextResponse } from 'next/server';
+import { getTursoClient } from '../../../src/lib/turso';
 import {
   checkRateLimit,
   createRateLimitHeaders,
-} from '../../middleware/rateLimit';
+} from '../../../src/middleware/rateLimit';
 
-export const prerender = false;
-
-export const POST: APIRoute = async ({ request }) => {
+export async function POST(request: NextRequest) {
   // Rate limiting: 20 requests per minute per IP
   const rateLimitResult = checkRateLimit(request, {
     maxRequests: 20,
@@ -27,12 +25,12 @@ export const POST: APIRoute = async ({ request }) => {
   };
 
   if (!rateLimitResult.allowed) {
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         error: 'Too many requests',
         message: 'Rate limit exceeded. Please try again later.',
         retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
-      }),
+      },
       {
         status: 429,
         headers: {
@@ -41,7 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
             (rateLimitResult.resetTime - Date.now()) / 1000,
           ).toString(),
         },
-      },
+      }
     );
   }
 
@@ -50,20 +48,20 @@ export const POST: APIRoute = async ({ request }) => {
     const { query, limit = 10 } = body;
 
     if (!query || typeof query !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'Query parameter is required' }),
-        { status: 400, headers: rateLimitHeaders },
+      return NextResponse.json(
+        { error: 'Query parameter is required' },
+        { status: 400, headers: rateLimitHeaders }
       );
     }
 
     // Limit query length to prevent abuse
     if (query.length > 500) {
-      return new Response(
-        JSON.stringify({
+      return NextResponse.json(
+        {
           error: 'Query too long',
           message: 'Query must be less than 500 characters',
-        }),
-        { status: 400, headers: rateLimitHeaders },
+        },
+        { status: 400, headers: rateLimitHeaders }
       );
     }
 
@@ -79,42 +77,44 @@ export const POST: APIRoute = async ({ request }) => {
       limit: sanitizedLimit,
       embeddingOptions: {
         provider:
-          ((import.meta.env.EMBEDDING_PROVIDER ||
-            process.env.EMBEDDING_PROVIDER) as 'local' | 'gemini' | 'openai') ||
+          (process.env.EMBEDDING_PROVIDER as 'local' | 'gemini' | 'openai') ||
           'local',
       },
     });
 
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         results,
         count: results.length,
         query,
-      }),
+      },
       {
         status: 200,
         headers: rateLimitHeaders,
-      },
+      }
     );
   } catch (error) {
     logger.error('Search error:', error);
 
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         error: 'Search failed',
         message: error instanceof Error ? error.message : 'Unknown error',
-      }),
+      },
       {
         status: 500,
         headers: rateLimitHeaders,
-      },
+      }
     );
   }
-};
+}
 
-export const GET: APIRoute = async () => {
-  return new Response(JSON.stringify({ error: 'Use POST method for search' }), {
-    status: 405,
-    headers: { 'Content-Type': 'application/json' },
-  });
-};
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Use POST method for search' },
+    {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+}
