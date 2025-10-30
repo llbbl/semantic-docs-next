@@ -45,3 +45,4 @@ local.db-wal
 *.db
 *.db-shm
 *.db-wal
+/tsconfig.tsbuildinfo

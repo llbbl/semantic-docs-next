@@ -5,7 +5,7 @@
 
 import { search } from '@logan/libsql-search';
 import { logger } from '@logan/logger';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getTursoClient } from '../../../src/lib/turso';
 import {
   checkRateLimit,
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             (rateLimitResult.resetTime - Date.now()) / 1000,
           ).toString(),
         },
-      }
+      },
     );
   }
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
         { error: 'Query parameter is required' },
-        { status: 400, headers: rateLimitHeaders }
+        { status: 400, headers: rateLimitHeaders },
       );
     }
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           error: 'Query too long',
           message: 'Query must be less than 500 characters',
         },
-        { status: 400, headers: rateLimitHeaders }
+        { status: 400, headers: rateLimitHeaders },
       );
     }
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       {
         status: 200,
         headers: rateLimitHeaders,
-      }
+      },
     );
   } catch (error) {
     logger.error('Search error:', error);
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       {
         status: 500,
         headers: rateLimitHeaders,
-      }
+      },
     );
   }
 }
@@ -115,6 +115,6 @@ export async function GET() {
     {
       status: 405,
       headers: { 'Content-Type': 'application/json' },
-    }
+    },
   );
 }

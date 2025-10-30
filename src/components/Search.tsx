@@ -1,10 +1,12 @@
+'use client';
+
 /**
  * Semantic Search Component
  *
  * Command dialog with ⌘K keyboard shortcut
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   CommandDialog,
   CommandEmpty,

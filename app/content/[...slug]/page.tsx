@@ -1,11 +1,11 @@
 import { getAllArticles, getArticleBySlug } from '@logan/libsql-search';
 import { marked } from 'marked';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getTursoClient } from '../../../src/lib/turso';
 import DocsHeader from '../../../components/DocsHeader';
 import DocsSidebar from '../../../components/DocsSidebar';
 import DocsToc from '../../../src/components/DocsToc';
-import type { Metadata } from 'next';
+import { getTursoClient } from '../../../src/lib/turso';
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;
@@ -22,7 +22,9 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for each page
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const slugString = slug.join('/');
   const client = getTursoClient();
@@ -97,7 +99,9 @@ export default async function ContentPage({ params }: PageProps) {
           <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
             <article className="prose prose-neutral dark:prose-invert max-w-none overflow-x-auto relative">
               <header className="mb-8 pb-6 border-b border-border">
-                <h1 className="text-4xl font-bold tracking-tight text-balance mb-4">{article.title}</h1>
+                <h1 className="text-4xl font-bold tracking-tight text-balance mb-4">
+                  {article.title}
+                </h1>
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag: string) => (
@@ -112,7 +116,10 @@ export default async function ContentPage({ params }: PageProps) {
                 )}
               </header>
 
-              <div className="article-content" dangerouslySetInnerHTML={{ __html: htmlContent }} />
+              <div
+                className="article-content"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              />
 
               <footer className="mt-12 pt-6 border-t border-border">
                 <p className="text-sm text-muted-foreground">

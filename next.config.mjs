@@ -49,16 +49,16 @@ const nextConfig = {
     config.plugins.push(
       new webpack.NormalModuleReplacementPlugin(
         /\.\/@google\/generative-ai$/,
-        path.resolve(__dirname, 'src/lib/empty-module.js')
+        path.resolve(__dirname, 'src/lib/empty-module.js'),
       ),
       new webpack.NormalModuleReplacementPlugin(
         /\.\/openai$/,
-        path.resolve(__dirname, 'src/lib/empty-module.js')
+        path.resolve(__dirname, 'src/lib/empty-module.js'),
       ),
       new webpack.NormalModuleReplacementPlugin(
         /\.\/winston$/,
-        path.resolve(__dirname, 'src/lib/empty-module.js')
-      )
+        path.resolve(__dirname, 'src/lib/empty-module.js'),
+      ),
     );
 
     return config;

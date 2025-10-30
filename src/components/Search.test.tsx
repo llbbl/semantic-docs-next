@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Search from './Search';
 
@@ -82,7 +83,7 @@ describe('Search Component', () => {
     await waitFor(
       () => {
         expect(fetch).toHaveBeenCalledWith(
-          '/api/search.json',
+          '/api/search',
           expect.objectContaining({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -191,7 +192,7 @@ describe('Search Component', () => {
     await waitFor(
       () => {
         expect(fetch).toHaveBeenCalledWith(
-          '/api/search.json',
+          '/api/search',
           expect.objectContaining({
             body: JSON.stringify({ query: 'test', limit: 10 }),
           }),

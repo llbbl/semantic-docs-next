@@ -1,11 +1,11 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 /**
  * Docs Sidebar Component
  * Collapsible navigation populated from Turso database
  */
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
 
 interface Article {
   slug: string;
@@ -38,7 +38,7 @@ export default function DocsSidebar({ articles }: DocsSidebarProps) {
       acc[folder].push(article);
       return acc;
     },
-    {} as Record<string, Article[]>
+    {} as Record<string, Article[]>,
   );
 
   return (
@@ -86,14 +86,20 @@ function FolderSection({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
       {isOpen && (
         <div className="mt-2 space-y-1">
           {articles.map((article) => {
             const href = `/content/${article.slug}`;
-            const isActive = currentPath === href || currentPath.startsWith(href + '/');
+            const isActive =
+              currentPath === href || currentPath.startsWith(href + '/');
 
             return (
               <a

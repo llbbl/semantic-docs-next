@@ -21,14 +21,30 @@
       "correctness": {
         "noUnusedImports": "off",
         "noUnusedVariables": "off",
-        "useExhaustiveDependencies": "off"
+        "useExhaustiveDependencies": "off",
+        "useUniqueElementIds": "off"
       },
       "suspicious": {
         "noImplicitAnyLet": "off",
         "noAssignInExpressions": "off",
         "noUnknownAtRules": "off",
         "useIterableCallbackReturn": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off"
+      },
+      "style": {
+        "useTemplate": "off"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true
     }
   },
   "javascript": {

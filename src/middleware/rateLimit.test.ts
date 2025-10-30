@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkRateLimit, createRateLimitHeaders } from './rateLimit';
 
@@ -11,7 +12,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should allow requests under the limit', () => {
-    const request = new Request('http://localhost/api/search.json', {
+    const request = new NextRequest('http://localhost/api/search', {
       headers: { 'x-forwarded-for': '1.2.3.4' },
     });
 
@@ -27,7 +28,7 @@ describe('checkRateLimit', () => {
 
   it('should block requests over the limit', () => {
     // Use unique IP to avoid interference from other tests
-    const request = new Request('http://localhost/api/search.json', {
+    const request = new NextRequest('http://localhost/api/search', {
       headers: { 'x-forwarded-for': '10.20.30.40' },
     });
 
@@ -53,7 +54,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should reset after window expires', () => {
-    const request = new Request('http://localhost/api/search.json', {
+    const request = new NextRequest('http://localhost/api/search', {
       headers: { 'x-forwarded-for': '1.2.3.4' },
     });
 
@@ -75,11 +76,11 @@ describe('checkRateLimit', () => {
   });
 
   it('should track different IPs separately', () => {
-    const request1 = new Request('http://localhost/api/search.json', {
+    const request1 = new NextRequest('http://localhost/api/search', {
       headers: { 'x-forwarded-for': '1.2.3.4' },
     });
 
-    const request2 = new Request('http://localhost/api/search.json', {
+    const request2 = new NextRequest('http://localhost/api/search', {
       headers: { 'x-forwarded-for': '5.6.7.8' },
     });
 
@@ -97,7 +98,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should handle CF-Connecting-IP header', () => {
-    const request = new Request('http://localhost/api/search.json', {
+    const request = new NextRequest('http://localhost/api/search', {
       headers: { 'cf-connecting-ip': '1.2.3.4' },
     });
 
@@ -106,7 +107,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should handle x-real-ip header', () => {
-    const request = new Request('http://localhost/api/search.json', {
+    const request = new NextRequest('http://localhost/api/search', {
       headers: { 'x-real-ip': '1.2.3.4' },
     });
 
