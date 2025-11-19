@@ -74,6 +74,11 @@
     "vitest": "^3.2.4"
   },
   "pnpm": {
+    "supportedArchitectures": {
+      "os": ["linux"],
+      "cpu": ["arm64", "x64"],
+      "libc": ["glibc"]
+    },
     "allowedBuilds": [
       "sharp",
       "@xenova/transformers"
