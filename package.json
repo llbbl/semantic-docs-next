@@ -22,6 +22,7 @@
     "url": "https://github.com/llbbl/semantic-docs/issues"
   },
   "homepage": "https://github.com/llbbl/semantic-docs#readme",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -73,6 +74,19 @@
     "vitest": "^3.2.4"
   },
   "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "linux",
+        "darwin"
+      ],
+      "cpu": [
+        "arm64",
+        "x64"
+      ],
+      "libc": [
+        "glibc"
+      ]
+    },
     "allowedBuilds": [
       "sharp",
       "@xenova/transformers"

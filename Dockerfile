@@ -1,28 +1,39 @@
-# Production Dockerfile - Uses Turso database
-# Automatically indexes content to Turso during build
+# Multi-stage Dockerfile using pnpm with npm/npx elimination
+# Reverted from Alpine to Debian Slim due to onnxruntime-node glibc dependency
+# Alpine uses musl libc which is incompatible with native dependencies requiring glibc
+# See docs/alpine-to-slim-rollback.md for details
 
-# Build stage
-FROM node:20-slim AS builder
+# =============================================================================
+# Base Stage - Foundation with Corepack and pnpm
+# =============================================================================
+FROM node:24-slim AS base
+
+# Enable Corepack and activate pnpm version from package.json
+WORKDIR /app
+COPY package.json ./
+RUN corepack enable && \
+    corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+
+# =============================================================================
+# Dependencies Stage - Install all dependencies
+# =============================================================================
+FROM base AS deps
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install all dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile
+
+# =============================================================================
+# Builder Stage - Build application with database initialization
+# =============================================================================
+FROM base AS builder
 
 # Build arguments for Turso credentials (required for indexing and pre-rendering)
 ARG TURSO_DB_URL
 ARG TURSO_AUTH_TOKEN
 ARG EMBEDDING_PROVIDER=local
-
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy source files
-COPY . .
 
 # Set environment variables for build
 ENV TURSO_DB_URL=$TURSO_DB_URL
@@ -30,26 +41,81 @@ ENV TURSO_AUTH_TOKEN=$TURSO_AUTH_TOKEN
 ENV EMBEDDING_PROVIDER=$EMBEDDING_PROVIDER
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source files
+COPY . .
+
 # Index content to Turso database (env vars already set via ENV directives)
 RUN pnpm exec tsx scripts/init-db.ts && pnpm exec tsx scripts/index-content.ts
 
 # Build Next.js application (queries Turso database for static pre-rendering)
 RUN pnpm build
 
-# Production stage
-FROM node:20-slim AS runtime
+# =============================================================================
+# Production Dependencies Stage - Install only production dependencies
+# =============================================================================
+FROM base AS prod-deps
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
+
+# =============================================================================
+# Runner Stage - Minimal production runtime with npm/npx eliminated
+# =============================================================================
+FROM node:24-slim AS runner
 
 # Set working directory
 WORKDIR /app
 
-# Create non-root user
+# Install only runtime essentials and perform aggressive cleanup
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/locale/* \
+    && rm -rf /var/log/*
+
+# Enable Corepack for production
+RUN corepack enable
+
+# Create non-root user (Debian uses groupadd/useradd instead of Alpine's addgroup/adduser)
 RUN groupadd -g 1001 nodejs && \
     useradd -r -u 1001 -g nodejs nextjs
+
+# Copy production dependencies
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Copy standalone output from Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Remove npm and npx while preserving Corepack
+# This eliminates npm CVEs while maintaining pnpm support via Corepack
+RUN rm -rf \
+    /usr/local/lib/node_modules/npm \
+    /usr/local/lib/node_modules/corepack/dist/npm*.js \
+    /usr/local/lib/node_modules/corepack/dist/npx*.js \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx \
+    /opt/corepack/shims/npm \
+    /opt/corepack/shims/npx 2>/dev/null || true
+
+# Additional size reductions - remove unnecessary Node.js files
+RUN find /usr/local/lib/node_modules -name "*.md" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.txt" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.map" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "test" -type d -prune -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "tests" -type d -prune -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.d.ts" -delete 2>/dev/null || true
 
 # Switch to non-root user
 USER nextjs
