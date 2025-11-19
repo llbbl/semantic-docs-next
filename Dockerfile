@@ -1,11 +1,12 @@
 # Multi-stage Dockerfile using pnpm with npm/npx elimination
-# Migrated from npm to pnpm to eliminate npm CVEs while maintaining Corepack support
-# See docs/dockerfile-pnpm-standardization.md for architecture details
+# Reverted from Alpine to Debian Slim due to onnxruntime-node glibc dependency
+# Alpine uses musl libc which is incompatible with native dependencies requiring glibc
+# See docs/alpine-to-slim-rollback.md for details
 
 # =============================================================================
 # Base Stage - Foundation with Corepack and pnpm
 # =============================================================================
-FROM node:24-alpine AS base
+FROM node:24-slim AS base
 
 # Enable Corepack and activate pnpm version from package.json
 WORKDIR /app
@@ -66,17 +67,28 @@ RUN pnpm install --frozen-lockfile --prod
 # =============================================================================
 # Runner Stage - Minimal production runtime with npm/npx eliminated
 # =============================================================================
-FROM node:24-alpine AS runner
+FROM node:24-slim AS runner
 
 # Set working directory
 WORKDIR /app
 
+# Install only runtime essentials and perform aggressive cleanup
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/locale/* \
+    && rm -rf /var/log/*
+
 # Enable Corepack for production
 RUN corepack enable
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+# Create non-root user (Debian uses groupadd/useradd instead of Alpine's addgroup/adduser)
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nextjs
 
 # Copy production dependencies
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
@@ -96,6 +108,14 @@ RUN rm -rf \
     /usr/local/bin/npx \
     /opt/corepack/shims/npm \
     /opt/corepack/shims/npx 2>/dev/null || true
+
+# Additional size reductions - remove unnecessary Node.js files
+RUN find /usr/local/lib/node_modules -name "*.md" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.txt" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.map" -delete 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "test" -type d -prune -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "tests" -type d -prune -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/node_modules -name "*.d.ts" -delete 2>/dev/null || true
 
 # Switch to non-root user
 USER nextjs
