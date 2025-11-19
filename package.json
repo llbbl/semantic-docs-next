@@ -22,6 +22,7 @@
     "url": "https://github.com/llbbl/semantic-docs/issues"
   },
   "homepage": "https://github.com/llbbl/semantic-docs#readme",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
