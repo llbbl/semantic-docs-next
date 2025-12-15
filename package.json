@@ -69,7 +69,7 @@
     "ignore-loader": "^0.1.2",
     "node-loader": "^2.1.0",
     "postcss": "^8.4.49",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
