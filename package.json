@@ -65,7 +65,7 @@
     "@vitest/browser": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.23",
-    "happy-dom": "^20.1.0",
+    "happy-dom": "^20.8.8",
     "ignore-loader": "^0.1.2",
     "node-loader": "^2.1.0",
     "postcss": "^8.5.6",
